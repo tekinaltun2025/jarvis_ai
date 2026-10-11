@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -233,105 +233,106 @@ footer{
 .bar{height:3px; background:#0a2435; margin-top:3px}
 .bar i{display:block; height:100%; background:linear-gradient(90deg,var(--cyan-dim),var(--cyan)); width:0%; transition:width .4s}
 </style>
+<link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg" />
 </head>
 <body>
 <div id="pinGate" style="display:none; position:fixed; inset:0; z-index:200; background:#020509f2;
   flex-direction:column; align-items:center; justify-content:center; gap:14px">
-  <div style="font-family:'Orbitron'; font-size:18px; letter-spacing:8px; color:var(--cyan); text-shadow:0 0 20px #00e5ff88">ACCESS CODE</div>
+  <div style="font-family:'Orbitron'; font-size:18px; letter-spacing:8px; color:var(--cyan); text-shadow:0 0 20px #00e5ff88">ERİŞİM KODU</div>
   <input id="pinInput" type="password" autocomplete="off" style="background:#06101c; border:1px solid var(--cyan-dim);
     color:#cfeefb; padding:10px 14px; font-family:'Orbitron'; font-size:16px; letter-spacing:4px; text-align:center; width:240px; outline:none">
-  <button class="btn" id="pinBtn">AUTHENTICATE</button>
+  <button class="btn" id="pinBtn">DOĞRULA</button>
   <div id="pinMsg" style="font-size:12px; color:var(--txt-dim); letter-spacing:2px">&nbsp;</div>
 </div>
 <div id="boot">
   <div id="bootLogo">J.A.R.V.I.S</div>
-  <div id="bootSub">HERMES NEURAL INTERFACE</div>
+  <div id="bootSub">HERMES SİNİR AĞI ARABİRİMİ</div>
   <div id="bootLines"></div>
 </div>
 <div id="grid">
   <header>
     <h1>J.A.R.V.I.S</h1>
-    <div class="sub">HERMES AGENT INTERFACE &nbsp;//&nbsp; <span id="connState">LINK DOWN</span></div>
+    <div class="sub">HERMES AGENT ARABİRİM &nbsp;//&nbsp; <span id="connState">BAĞLANTI YOK</span></div>
     <div id="clock">--:--:--</div>
   </header>
 
   <!-- LEFT COLUMN -->
   <div class="col">
-    <div class="panel"><h2><span>VOICE LINK</span><span class="num">01</span></h2>
-      <div class="kv"><span><span class="dot" id="wsDot"></span>Socket</span><b id="wsState">offline</b></div>
-      <div class="kv"><span><span class="dot" id="micDot"></span>Microphone</span><b id="micState">idle</b></div>
-      <div class="kv"><span>Input level</span><b>&nbsp;</b></div>
+    <div class="panel"><h2><span>SES BAĞLANTISI</span><span class="num">01</span></h2>
+      <div class="kv"><span><span class="dot" id="wsDot"></span>Socket</span><b id="wsState">çevrimdışı</b></div>
+      <div class="kv"><span><span class="dot" id="micDot"></span>Mikrofon</span><b id="micState">beklemede</b></div>
+      <div class="kv"><span>Giriş seviyesi</span><b>&nbsp;</b></div>
       <div class="bar"><i id="levelBar"></i></div>
       <div style="margin-top:8px; display:flex; gap:6px">
-        <button class="btn" id="talkBtn" style="flex:1">ENGAGE VOICE</button>
-        <button class="btn danger" id="stopBtn">■ STOP</button>
+        <button class="btn" id="talkBtn" style="flex:1">SES BAŞLAT</button>
+        <button class="btn danger" id="stopBtn">■ DURDUR</button>
       </div>
     </div>
-    <div class="panel"><h2><span>AGENT ACTIVITY</span><span class="num">02</span></h2>
-      <div id="activity"><div>— no activity yet —</div></div>
+    <div class="panel"><h2><span>AJAN AKTİVİTESİ</span><span class="num">02</span></h2>
+      <div id="activity"><div>— henüz aktivite yok —</div></div>
     </div>
-    <div class="panel"><h2><span>TURN METRICS</span><span class="num">03</span></h2>
-      <div class="kv"><span>Turns</span><b id="mTurns">0</b></div>
-      <div class="kv"><span>Last: speech→audio</span><b id="mFirst">—</b></div>
-      <div class="kv"><span>Last: total</span><b id="mTotal">—</b></div>
-      <div class="kv"><span>Brain</span><b id="mBrain">—</b></div>
+    <div class="panel"><h2><span>TUR METRİKLERİ</span><span class="num">03</span></h2>
+      <div class="kv"><span>Turlar</span><b id="mTurns">0</b></div>
+      <div class="kv"><span>Son: konuşma→ses</span><b id="mFirst">—</b></div>
+      <div class="kv"><span>Son: toplam</span><b id="mTotal">—</b></div>
+      <div class="kv"><span>Beyin</span><b id="mBrain">—</b></div>
     </div>
-    <div class="panel"><h2><span>VIEWS</span><span class="num">04</span></h2>
-      <button class="btn viewBtn" onclick="openView('KANBAN','/kanban')">▸ KANBAN BOARD</button>
-      <button class="btn viewBtn" onclick="openView('HERMES DASHBOARD','/')">▸ HERMES DASHBOARD</button>
-      <button class="btn viewBtn" onclick="openView('CHAT','/chat')">▸ DASHBOARD CHAT</button>
+    <div class="panel"><h2><span>GÖRÜNÜMLER</span><span class="num">04</span></h2>
+      <button class="btn viewBtn" onclick="openView('KANBAN','/kanban')">▸ KANBAN TAHTASI</button>
+      <button class="btn viewBtn" onclick="openView('HERMES DASHBOARD','/')">▸ HERMES PANELİ</button>
+      <button class="btn viewBtn" onclick="openView('CHAT','/chat')">▸ PANEL SOHBETİ</button>
     </div>
-    <div class="panel"><h2><span>SESSION</span><span class="num">05</span></h2>
-      <div class="kv"><span>Conversation</span><b>jarvis-main</b></div>
-      <div class="kv"><span>Memory scope</span><b>jarvis:user:main</b></div>
-      <div class="kv"><span>Active sessions</span><b id="hSessions">—</b></div>
-      <div class="kv"><span>Running agents</span><b id="hAgents">—</b></div>
+    <div class="panel"><h2><span>OTURUM</span><span class="num">05</span></h2>
+      <div class="kv"><span>Konuşma</span><b>jarvis-main</b></div>
+      <div class="kv"><span>Hafıza kapsamı</span><b>jarvis:user:main</b></div>
+      <div class="kv"><span>Aktif oturumlar</span><b id="hSessions">—</b></div>
+      <div class="kv"><span>Çalışan ajanlar</span><b id="hAgents">—</b></div>
     </div>
   </div>
 
   <!-- CENTER -->
   <div id="center">
     <div id="approvals"></div>
-    <div id="reactorWrap" title="Click to talk">
+    <div id="reactorWrap" title="Konuşmak için tıkla">
       <canvas id="reactor"></canvas>
-      <div id="coreState"><div class="st" id="stateLabel">STANDBY</div><div class="hint" id="stateHint">CLICK RING OR SPACE TO TALK</div></div>
+      <div id="coreState"><div class="st" id="stateLabel">BEKLEMEDE</div><div class="hint" id="stateHint">HALKA TIKLA VEYA BOŞLUK TUŞUNA BAS</div></div>
     </div>
     <div id="feed"></div>
     <div id="chatRow">
-      <input id="chatInput" placeholder="Type to Hermes… (/new resets · voice: click the ring)" autocomplete="off">
-      <button class="btn" id="sendBtn">SEND</button>
-      <button class="btn" id="clearBtn" title="Clear the visible chat (history stays in Hermes)">CLR</button>
+      <input id="chatInput" placeholder="Hermes'e yaz... (/new sıfırlar · ses: halka tıkla)" autocomplete="off">
+      <button class="btn" id="sendBtn">GÖNDER</button>
+      <button class="btn" id="clearBtn" title="Görünen sohbeti temizle (geçmiş Hermes'de kalır)">TEMİZLE</button>
     </div>
   </div>
 
   <!-- RIGHT COLUMN -->
   <div class="col">
-    <div class="panel"><h2><span>MODELS LOADOUT</span><span class="num">06</span></h2>
-      <div class="kv"><span>Brain</span><b>hermes-agent</b></div>
-      <div class="kv"><span>STT</span><b>whisper base.en</b></div>
-      <div class="kv"><span>TTS</span><b>ElevenLabs Flash v2.5</b></div>
-      <div class="kv"><span>Fallback</span><b>claude-haiku-4-5</b></div>
+    <div class="panel"><h2><span>MODEL YÜKLEMESİ</span><span class="num">06</span></h2>
+      <div class="kv"><span>Beyin</span><b>hermes-agent</b></div>
+      <div class="kv"><span>STT</span><b>whisper small.en</b></div>
+      <div class="kv"><span>TTS</span><b>Piper TTS (tr_TR-fahrettin-medium)</b></div>
+      <div class="kv"><span>Yedek</span><b>claude-haiku-4-5</b></div>
       <div style="border-top:1px solid var(--line); margin:6px 0 4px"></div>
-      <div class="kv"><span>Tokens today</span><b id="uTok">—</b></div>
-      <div class="kv" id="uCostRow" style="display:none"><span>Est. cost today</span><b id="uCost">—</b></div>
-      <div class="kv"><span>Turns today</span><b id="uTurns">—</b></div>
-      <div class="kv"><span>11Labs quota</span><b id="uTts">—</b></div>
+      <div class="kv"><span>Bugünkü tokenlar</span><b id="uTok">—</b></div>
+      <div class="kv" id="uCostRow" style="display:none"><span>Tahmini maliyet</span><b id="uCost">—</b></div>
+      <div class="kv"><span>Bugünkü turlar</span><b id="uTurns">—</b></div>
+      <div class="kv"><span>TTS karakterleri</span><b id="uTts">—</b></div>
       <div class="bar"><i id="ttsBar"></i></div>
     </div>
-    <div class="panel"><h2><span>MACHINES</span><span class="num">07</span></h2>
-      <div id="machinesList"><div class="kv"><span>loading…</span></div></div>
+    <div class="panel"><h2><span>MAKİNELER</span><span class="num">07</span></h2>
+      <div id="machinesList"><div class="kv"><span>yükleniyor…</span></div></div>
     </div>
-    <div class="panel"><h2><span>SKILLS</span><span class="num">08</span></h2>
-      <div class="kv"><span>Loaded skills</span><b id="skillCount">—</b></div>
+    <div class="panel"><h2><span>YETENEKLER</span><span class="num">08</span></h2>
+      <div class="kv"><span>Yüklü yetenekler</span><b id="skillCount">—</b></div>
       <div id="skillsList"></div>
     </div>
-    <div class="panel"><h2><span>DIAGNOSTICS</span><span class="num">09</span></h2>
+    <div class="panel"><h2><span>TANILAMA</span><span class="num">09</span></h2>
       <div class="kv"><span><span class="dot" id="apiDot"></span>Hermes API</span><b id="apiState">—</b></div>
       <div class="kv"><span>CPU</span><b id="hCpu">—</b></div>
-      <div class="kv"><span>Memory</span><b id="hMem">—</b></div>
-      <div class="kv"><span>Refreshed</span><b id="hWhen">—</b></div>
+      <div class="kv"><span>Bellek</span><b id="hMem">—</b></div>
+      <div class="kv"><span>Yenilendi</span><b id="hWhen">—</b></div>
     </div>
-    <div class="panel"><h2><span>AUTOMATIONS</span><span class="num">10</span></h2>
+    <div class="panel"><h2><span>OTOMASYONLAR</span><span class="num">10</span></h2>
       <div id="jobsList"><div>—</div></div>
     </div>
   </div>
@@ -343,8 +344,8 @@ footer{
       <div id="viewerBar">
         <h3 id="viewerTitle">KANBAN</h3>
         <div class="vbtns">
-          <button class="btn" id="viewerPop">OPEN TAB</button>
-          <button class="btn danger" id="viewerClose">✕ CLOSE</button>
+          <button class="btn" id="viewerPop">YENİ SEKME</button>
+          <button class="btn danger" id="viewerClose">✕ KAPAT</button>
         </div>
       </div>
       <iframe id="viewerIframe" src="about:blank" title="view"></iframe>
@@ -353,7 +354,7 @@ footer{
 
   <footer>
     <span></span>
-    <span id="footMsg">READY</span>
+    <span id="footMsg">HAZIR</span>
     <span>NOUS HERMES AGENT v0.16</span>
   </footer>
 </div>
@@ -442,7 +443,7 @@ function addActivity(text,toolName,preview){
   const a=$("activity");
   if(a.firstChild&&a.firstChild.textContent.startsWith("—"))a.innerHTML="";
   const d=document.createElement("div");
-  const esc=s=>String(s||"").replace(/[<>&]/g,c=>({"<":"&lt;",">":"&gt;","&":"&amp;"}[c]));
+  const esc=s=>String(s||"").replace(/[<>&]/g,c=>({"<":"<",">":">","&":"&"}[c]));
   d.innerHTML=toolName?`▸ tool <b>${esc(toolName)}</b> <span style="opacity:.7">${esc((preview||"").slice(0,60))}</span>`:`▸ ${esc(text)}`;
   a.prepend(d); while(a.children.length>40)a.removeChild(a.lastChild);
 }
@@ -465,25 +466,25 @@ function stopRun(){
 /* approval cards */
 function showApproval(e){
   const data=e.data||{};
-  const esc=s=>String(s||"").replace(/[<>&]/g,c=>({"<":"&lt;",">":"&gt;","&":"&amp;"}[c]));
+  const esc=s=>String(s||"").replace(/[<>&]/g,c=>({"<":"<",">":">","&":"&"}[c]));
   const id=data.approval_id||data.id||"";
   const desc=data.preview||data.command||data.description||JSON.stringify(data).slice(0,300);
   const card=document.createElement("div"); card.className="appr";
-  card.innerHTML=`<h3>⚠ APPROVAL REQUIRED</h3><pre>${esc(desc)}</pre>
-    <div class="row"><button class="btn">ALLOW</button><button class="btn danger">DENY</button></div>`;
+  card.innerHTML=`<h3>⚠ ONAY GEREKLİ</h3><pre>${esc(desc)}</pre>
+    <div class="row"><button class="btn">İZİN VER</button><button class="btn danger">REDRET</button></div>`;
   const [allowB,denyB]=card.querySelectorAll("button");
   const send=dec=>{ if(wsReady)ws.send(JSON.stringify({type:"approval_decision",run_id:e.run_id||currentRun,approval_id:id,decision:dec})); card.remove(); };
   allowB.onclick=()=>send("allow"); denyB.onclick=()=>send("deny");
   $("approvals").appendChild(card);
-  addActivity("approval requested");
+  addActivity("onay istendi");
 }
 
 /* ============================== websocket ========================== */
 function wsUrl(){return (location.protocol==="https:"?"wss://":"ws://")+location.host+"/ws"}
 function connect(){
   ws=new WebSocket(wsUrl()); ws.binaryType="arraybuffer";
-  ws.onopen=()=>{wsReady=true;$("wsDot").className="dot on";$("wsState").textContent="online";$("connState").textContent="LINK ACTIVE";$("footMsg").textContent="VOICE SERVER CONNECTED"};
-  ws.onclose=()=>{wsReady=false;$("wsDot").className="dot off";$("wsState").textContent="offline";$("connState").textContent="LINK DOWN";setState("standby","STANDBY");setTimeout(connect,3000)};
+  ws.onopen=()=>{wsReady=true;$("wsDot").className="dot on";$("wsState").textContent="çevrimiçi";$("connState").textContent="BAĞLANTI AKTİF";$("footMsg").textContent="SES SUNUCUSU BAĞLANDI"};
+  ws.onclose=()=>{wsReady=false;$("wsDot").className="dot off";$("wsState").textContent="çevrimdışı";$("connState").textContent="BAĞLANTI YOK";setState("standby","BEKLEMEDE");setTimeout(connect,3000)};
   ws.onerror=()=>{};
   ws.onmessage=ev=>{
     if(ev.data instanceof ArrayBuffer){playChunk(ev.data);return}
@@ -495,12 +496,12 @@ function connect(){
     else if(e.type==="run_started"){ currentRun=e.run_id; showStop(true); }
     else if(e.type==="approval_request"){ showApproval(e); }
     else if(e.type==="agent_status"){
-      if(e.state==="thinking"){setState("thinking","PROCESSING");showStop(true)}
-      else if(e.state==="tool_use"){setState("tool","WORKING");addActivity("",e.tool||"tool",e.preview)}
-      else if(e.state==="speaking")setState("speaking","SPEAKING");
-      else if(e.state==="stopped"){setState("standby","STANDBY");showStop(false);stopPlayback();addMsg("sys","run stopped")}
+      if(e.state==="thinking"){setState("thinking","İŞLENİYOR");showStop(true)}
+      else if(e.state==="tool_use"){setState("tool","ÇALIŞIYOR");addActivity("",e.tool||"tool",e.preview)}
+      else if(e.state==="speaking")setState("speaking","KONUŞUYOR");
+      else if(e.state==="stopped"){setState("standby","BEKLEMEDE");showStop(false);stopPlayback();addMsg("sys","çalıştırma durduruldu")}
     }
-    else if(e.type==="error"){ clearLive(); addMsg("sys","error: "+e.message); setState("standby","STANDBY"); showStop(false); }
+    else if(e.type==="error"){ clearLive(); addMsg("sys","hata: "+e.message); setState("standby","BEKLEMEDE"); showStop(false); }
     else if(e.type==="done"){
       currentRun=null; showStop(false);
       const tm=e.timing||{};
@@ -509,7 +510,7 @@ function connect(){
       if(tm.total_turn_seconds!=null)$("mTotal").textContent=tm.total_turn_seconds+"s";
       $("mBrain").textContent=tm.llm_provider||"—";
       if(tm.response_text)addMsg("jarvis",tm.response_text);
-      setTimeout(()=>{if(state!=="listening")setState("standby","STANDBY")},400);
+      setTimeout(()=>{if(state!=="listening")setState("standby","BEKLEMEDE")},400);
     }
   };
 }
@@ -575,7 +576,16 @@ async function initMic(){
     await audioCtx.audioWorklet.addModule(url); workletReady=true;
   }
   if(!mediaStream){
-    mediaStream=await navigator.mediaDevices.getUserMedia({audio:{channelCount:1,sampleRate:16000,echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
+    try{
+      mediaStream=await navigator.mediaDevices.getUserMedia({audio:{channelCount:1,sampleRate:16000,echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
+    }catch(e1){
+      // exact constraints not supported (e.g. Pro Audio profile has no processing) → relaxed retry
+      try{
+        mediaStream=await navigator.mediaDevices.getUserMedia({audio:{channelCount:1}});
+      }catch(e2){
+        mediaStream=await navigator.mediaDevices.getUserMedia({audio:true});
+      }
+    }
     srcNode=audioCtx.createMediaStreamSource(mediaStream);
     workletNode=new AudioWorkletNode(audioCtx,"pcm16k");
     workletNode.port.onmessage=e=>{
@@ -588,33 +598,33 @@ async function initMic(){
     };
     srcNode.connect(workletNode);
   }
-  $("micDot").className="dot on"; $("micState").textContent="ready";
+  $("micDot").className="dot on"; $("micState").textContent="hazır";
 }
 
 /* ============================== talk flow ========================== */
 async function toggleTalk(){
-  if(!wsReady){addMsg("sys","voice server offline");return}
+  if(!wsReady){addMsg("sys","ses sunucusu çevrimdışı");return}
   if(capturing){ // stop talking
     capturing=false;
     ws.send(JSON.stringify({type:"stop"}));
-    $("talkBtn").textContent="ENGAGE VOICE"; $("micState").textContent="ready"; $("levelBar").style.width="0%";
-    setState("thinking","PROCESSING");
+    $("talkBtn").textContent="SES BAŞLAT"; $("micState").textContent="hazır"; $("levelBar").style.width="0%";
+    setState("thinking","İŞLENİYOR");
     return;
   }
-  try{await initMic()}catch(err){addMsg("sys","mic blocked: "+err.message);return}
+  try{await initMic()}catch(err){addMsg("sys","mikrofon engellendi: "+err.message);return}
   stopPlayback();                       // barge-in
   audioArrived=false;
   ws.send(JSON.stringify({type:"start",sample_rate:16000,format:"pcm_s16le",channels:1,conversation:CONV}));
   capturing=true;
-  $("talkBtn").textContent="■ STOP & SEND"; $("micState").textContent="LIVE";
-  setState("listening","LISTENING","CLICK AGAIN TO SEND");
+  $("talkBtn").textContent="■ DURDUR & GÖNDER"; $("micState").textContent="CANLI";
+  setState("listening","DİNLİYOR","GÖNDERMEK İÇİN TEKRAR TIKLAYIN");
 }
 $("talkBtn").onclick=toggleTalk;
 $("reactorWrap").onclick=toggleTalk;
 $("stopBtn").onclick=stopRun;
 
 /* ---- pop-up viewer ---- */
-const DASH_PROXY=`https://${location.hostname}:9443`;
+const DASH_PROXY=`https://${location.hostname}:8767`;
 function openView(name,path){
   $("viewerTitle").textContent=name;
   $("viewerIframe").src=DASH_PROXY+path;
@@ -640,22 +650,24 @@ addEventListener("keydown",e=>{
 /* ============================== typed chat ========================= */
 async function sendChat(){
   const inp=$("chatInput"); const text=inp.value.trim(); if(!text)return;
-  inp.value=""; addMsg("you",text); setState("thinking","PROCESSING");
+  inp.value=""; addMsg("you",text); setState("thinking","İŞLENİYOR");
   try{
     const r=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},
       body:JSON.stringify({input:text,conversation:CONV})});
     const j=await r.json();
     if(!r.ok)throw new Error(j.error||r.status);
-    (j.tools||[]).forEach(t=>addActivity("",t.name,t.preview));
-    addMsg("jarvis",j.text||"(no reply)");
-    if(/^\/(new|reset|clear)\b/i.test(text)){     // slash reset → also clear the visible feed
-      setTimeout(()=>{feed.innerHTML="";addMsg("sys","conversation reset");},800);
+    if (j.tools) {
+        j.tools.forEach(t=>addActivity("",t.name,t.preview));
     }
-  }catch(err){ addMsg("sys","chat error: "+err.message); }
-  if(state!=="listening")setState("standby","STANDBY");
+    addMsg("jarvis", j.text != null ? j.text : "(yanıt yok)");
+    if(/^\\\/(new|reset|clear)\\b/i.test(text)){     // slash reset → also clear the visible feed
+      setTimeout(()=>{feed.innerHTML="";addMsg("sys","konuşma sıfırlandı");},800);
+    }
+  }catch(err){ addMsg("sys","sohbet hatası: "+err.message); }
+  if(state!=="listening")setState("standby","BEKLEMEDE");
 }
 $("sendBtn").onclick=sendChat;
-$("clearBtn").onclick=()=>{feed.innerHTML="";addMsg("sys","chat cleared (history stays in Hermes — type /new to reset the conversation)");};
+$("clearBtn").onclick=()=>{feed.innerHTML="";addMsg("sys","sohbet temizlendi (geçmiş Hermes'te kalır — konuşmayı sıfırlamak için /new yazın)");};
 $("chatInput").addEventListener("keydown",e=>{if(e.key==="Enter")sendChat()});
 
 /* ============================== widgets ============================ */
@@ -663,14 +675,14 @@ async function jget(path){const r=await fetch("/api/hermes"+path);if(!r.ok)throw
 async function refreshHealth(){
   try{
     const h=await jget("/health/detailed");
-    $("apiDot").className="dot on"; $("apiState").textContent="online";
+    $("apiDot").className="dot on"; $("apiState").textContent="çevrimiçi";
     const st=h.sessions||h.session_stats||{}; const rs=h.resources||{};
-    $("hSessions").textContent=st.active??st.total??"ok";
-    $("hAgents").textContent=h.running_agents??h.agents??"0";
+    $("hSessions").textContent=st.active||st.total||"ok";
+    $("hAgents").textContent=h.running_agents||h.agents||"0";
     $("hCpu").textContent=rs.cpu_percent!=null?rs.cpu_percent+"%":"—";
     $("hMem").textContent=rs.memory_percent!=null?rs.memory_percent+"%":(rs.rss||"—");
     $("hWhen").textContent=new Date().toTimeString().slice(0,8);
-  }catch{ $("apiDot").className="dot off"; $("apiState").textContent="offline"; }
+  }catch{ $("apiDot").className="dot off"; $("apiState").textContent="çevrimdışı"; }
 }
 async function refreshSkills(){
   try{
@@ -683,8 +695,8 @@ async function refreshJobs(){
   try{
     const j=await jget("/api/jobs"); const list=Array.isArray(j)?j:(j.jobs||j.data||[]);
     $("jobsList").innerHTML=list.length?list.slice(0,8).map(x=>
-      `<div>▸ ${x.name||x.prompt?.slice(0,38)||x.id} <span class="${x.paused?"warn":"ok"}">${x.paused?"paused":"on"}</span></div>`).join("")
-      :"<div>— none —</div>";
+      `<div>▸ ${x.name||x.prompt?.slice(0,38)||x.id} <span class="${x.paused?"warn":"ok"}">${x.paused?"duraklatıldı":"aktif"}</span></div>`).join("")
+      :"<div>— yok —</div>";
   }catch{ $("jobsList").innerHTML="<div>—</div>"; }
 }
 async function refreshMachines(){
@@ -698,9 +710,9 @@ async function refreshMachines(){
       if(m.vram_used!=null&&m.vram_total!=null)bits.push(`VRAM ${m.vram_used}/${m.vram_total}G`);
       if(m.gpu_temp!=null)bits.push(`${m.gpu_temp}°`);
       if(!bits.length&&m.note)bits.push(m.note);
-      return `<div class="kv"><span><span class="dot ${m.online?"on":"off"}"></span>${m.name}</span><b>${bits.join(" · ")||(m.online?"online":"offline")}</b></div>`;
+      return `<div class="kv"><span><span class="dot ${m.online?"on":"off"}"></span>${m.name}</span><b>${bits.join(" · ")||(m.online?"çevrimiçi":"çevrimdışı")}</b></div>`;
     }).join("");
-  }catch{ $("machinesList").innerHTML="<div class='kv'><span>unavailable</span></div>"; }
+  }catch{ $("machinesList").innerHTML="<div class='kv'><span>erişilemez</span></div>"; }
 }
 const fmtK=n=>n>=1e6?(n/1e6).toFixed(1)+"M":n>=1e3?(n/1e3).toFixed(1)+"k":String(n||0);
 async function refreshUsage(){
@@ -832,7 +844,7 @@ $("pinBtn").onclick=async()=>{
   const v=$("pinInput").value.trim(); if(!v)return;
   document.cookie=`jarvis_token=${encodeURIComponent(v)}; path=/; max-age=31536000; secure; samesite=lax`;
   const r=await fetch("/api/usage");
-  if(r.status===401){$("pinMsg").textContent="ACCESS DENIED";$("pinInput").value="";return}
+  if(r.status===401){$("pinMsg").textContent="ERİŞİM REDDEDİLDİ";$("pinInput").value="";return}
   location.reload();
 };
 $("pinInput")&&$("pinInput").addEventListener("keydown",e=>{if(e.key==="Enter")$("pinBtn").click()});
@@ -841,45 +853,79 @@ checkAuth();
 /* ============================== boot sequence ====================== */
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const BOOT_LINES=[
-  ["INITIALIZING NEURAL INTERFACE",380],["LOADING HUD MODULES",300],
-  ["CONNECTING HERMES CORE",650],["VOICE LINK ESTABLISHED",420],
-  ["MEMORY SYSTEMS SYNCHRONIZED",420],["WEAPONS OFFLINE. KETTLE ONLINE.",300],
-  ["ALL SYSTEMS NOMINAL",550],
+  ["SİNİR AĞI BAŞLATILIYOR",380],["HUD MODÜLLERİ YÜKLENİYOR",300],
+  ["HERMES ÇEKİRDEĞİ BAĞLANIYOR",650],["SES BAĞLANTISI KURULDU",420],
+  ["HAFIZA SİSTEMLERİ SENKRONİZE",420],["SİLAHLAR KAPALI. ÇAY HAZIR.",300],
+  ["TÜM SİSTEMLER NOMİNAL",550],
 ];
 let bootRunning=false;
 async function bootSequence(full){
-  if(bootRunning)return; bootRunning=true;
-  const boot=$("boot");
-  boot.classList.remove("done"); boot.style.display="flex";
-  document.body.classList.remove("booted"); document.body.classList.add("booting");
-  const bl=$("bootLines"); bl.innerHTML="";
-  const scale=full?1:0.32;
-  for(const [t,d] of BOOT_LINES){
-    if(!full&&t.startsWith("WEAPONS"))continue;   // easter egg only in full boot
-    const div=document.createElement("div"); div.innerHTML="▸ "+t+" <b>OK</b>";
-    bl.appendChild(div); await sleep(d*scale);
+  try{
+    if(bootRunning)return; bootRunning=true;
+    const boot=$("boot");
+    boot.classList.remove("done"); boot.style.display="flex";
+    document.body.classList.remove("booted"); document.body.classList.add("booting");
+    const bl=$("bootLines"); bl.innerHTML="";
+    const lines = full
+        ?[
+            "HERMES SINIR AĞI KORE v0.16",
+            "ÇEKIRDEK MODÜLLERİ YÜKLENIYOR...",
+            "HERMES AGENT: actif",
+            "STT MODEL: whisper small.en",
+            "TTS MODEL: Piper TTS (tr_TR-fahrettin-medium)",
+            "WEB SOCKET: bağlanıyor...",
+            "KİMLİK DOĞRLAMA: başarılı",
+            "HÜCRE SİSTEMİ: aktif",
+            "HOLOGRAFİK ARAYÜZ: hazır",
+            "SİSTEM HAZIR"
+          ]
+        :[
+            "HERMES AGENT: aktif",
+            "STT MODEL: whisper small.en",
+            "TTS MODEL: Piper TTS (tr_TR-fahrettin-medium)",
+            "WEB SOCKET: bağlanıyor...",
+            "KİMLİK DOĞRLAMA: başarılı",
+            "HÜCRE SİSTEMİ: aktif",
+            "HOLOGRAFİK ARAYÜZ: hazır",
+            "SİSTEM HAZIR"
+          ];
+    for(const l of lines){
+      bl.innerHTML+=`<div>▸ ${l}</div>`;
+      await new Promise(r=>setTimeout(r,150));
+    }
+    boot.classList.add("done");
+    document.body.classList.remove("booting");
+    document.body.classList.add("booted");
+    bootRunning=false;
+    addMsg("sys","Jarvis HUD çevrimiçi. Halka tıkla veya Boşluk tuşuna basarak konuş.");
+  }catch(error){
+    console.error("Boot sequence error:", error);
+    // Even if there's an error, try to boot the system so user can use HUD
+    const boot=$("boot");
+    boot.classList.add("done");
+    document.body.classList.remove("booting");
+    document.body.classList.add("booted");
+    bootRunning=false;
+    addMsg("sys","Jarvis HUD çevrimiçi (boot hatası ile). Halka tıkla veya Boşluk tuşuna basarak konuş.");
   }
-  await sleep(full?350:120);
-  // staggered panel power-on
-  document.querySelectorAll(".panel").forEach((p,i)=>p.style.animationDelay=(120+i*95)+"ms");
-  boot.classList.add("done");
-  document.body.classList.remove("booting"); document.body.classList.add("booted");
-  if(full){
-    try{
-      const h=new Date().getHours();
-      const f=h<12?"morning":h<18?"afternoon":"evening";
-      await new Audio("audio/boot_"+f+".mp3").play();
-    }catch{/* audio needs a user gesture; B-key boots always have one */}
-  }
-  setTimeout(()=>{boot.style.display="none"},900);
-  bootRunning=false;
 }
 addEventListener("keydown",e=>{
   if((e.key==="b"||e.key==="B")&&document.activeElement!==$("chatInput"))bootSequence(true);
 });
-bootSequence(new URLSearchParams(location.search).get("boot")==="full");
+try {
+  bootSequence(new URLSearchParams(location.search).get("boot")==="full");
+} catch (e) {
+  console.error("Failed to start boot sequence", e);
+  // Fallback: try to boot anyway
+  const boot=$("boot");
+  boot.classList.add("done");
+  document.body.classList.remove("booting");
+  document.body.classList.add("booted");
+  bootRunning=false;
+  addMsg("sys","Jarvis HUD çevrimiçi (boot sequence hatası). Halka tıkla veya Boşluk tuşuna basarak konuş.");
+}
 
-addMsg("sys","Jarvis HUD online. Click the ring or press Space to talk.");
+addMsg("sys","Jarvis HUD çevrimiçi. Halka tıkla veya Boşluk tuşuna basarak konuş.");
 </script>
 </body>
 </html>

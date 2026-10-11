@@ -39,7 +39,7 @@ from anthropic import Anthropic
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
-from RealtimeSTT import AudioToTextRecorder
+from faster_whisper import WhisperModel  # noqa: F401  (direct one-shot STT)
 
 try:
     import psutil
@@ -299,17 +299,15 @@ class VoicePipelineServer:
         self.turn_counter = 0
         self.hermes = HermesAPI(cfg)
         self.stt_lock = asyncio.Lock()
-        self.recorder = AudioToTextRecorder(
-            model=cfg["stt"]["model"],
-            use_microphone=False,
-            spinner=False,
+        # Direct faster-whisper model. A previous AudioToTextRecorder ran a realtime
+        # worker we never used (use_microphone=False): its queue grew unboundedly
+        # ("Audio queue size exceeds latency limit" spam), bled stale audio into
+        # finals, and doubled model load time. Partials/finals are one-shot calls.
+        from faster_whisper import WhisperModel
+        self.whisper_model = WhisperModel(
+            cfg["stt"]["model"],
             device=cfg["stt"].get("device", "cpu"),
             compute_type=cfg["stt"].get("compute_type", "int8"),
-            sample_rate=int(cfg["stt"].get("sample_rate", 16000)),
-            language="en",
-            beam_size=1,
-            faster_whisper_vad_filter=False,
-            no_log_file=True,
         )
 
     def next_turn_id(self) -> int:
@@ -328,14 +326,15 @@ class VoicePipelineServer:
                     timing.stt_model = f"remote:{remote.get('name', 'gpu')}"
                     timing.stt_final_monotonic = time.perf_counter()
                 return text
-        # 2) local Whisper fallback
+        # 2) local Whisper — direct batch call, no realtime queue involved.
+        #    feed_audio()+perform_final_transcription() was feeding the unused
+        #    realtime worker queue (queue-size warnings, stale-partials bleed)
+        #    and forced the final pass through that same backed-up queue.
         sample_rate = int(self.cfg["stt"].get("sample_rate", 16000))
         samples = (np.frombuffer(audio, dtype=np.int16).astype(np.float32) / 32768.0).copy()
         try:
             async with self.stt_lock:
-                self.recorder.feed_audio(samples, original_sample_rate=sample_rate)
-                text = await asyncio.to_thread(self.recorder.perform_final_transcription, samples, True)
-                self.recorder.clear_audio_queue()
+                text = await asyncio.to_thread(self._whisper_direct, samples)
         except Exception as exc:
             # near-silent audio can make whisper raise ("No clip timestamps found");
             # treat as empty transcript instead of failing the turn
@@ -344,6 +343,12 @@ class VoicePipelineServer:
         if timing:
             timing.stt_final_monotonic = time.perf_counter()
         return (text or "").strip()
+
+    def _whisper_direct(self, samples: np.ndarray) -> str:
+        """One-shot faster-whisper transcription of a fixed audio buffer."""
+        segs, _ = self.whisper_model.transcribe(
+            samples, language=self.cfg["stt"].get("language", "tr"), beam_size=1)
+        return " ".join(s.text for s in segs).strip()
 
     def _remote_stt(self, audio: bytes, remote: dict) -> str | None:
         """POST raw PCM to the GPU STT worker. None = unavailable (use fallback)."""
@@ -436,6 +441,100 @@ class VoicePipelineServer:
 
     def tts_chunks_sync(self, text: str, timing: TurnTiming) -> Iterator[bytes]:
         voice = self.cfg["voice"]
+        provider = voice.get("provider", "piper")
+        
+        if provider == "piper":
+            yield from self._tts_piper(text, timing, voice)
+        elif provider == "elevenlabs":
+            yield from self._tts_elevenlabs(text, timing, voice)
+        else:
+            raise RuntimeError(f"Unsupported TTS provider: {provider}")
+
+    def _tts_piper(self, text: str, timing: TurnTiming, voice: dict) -> Iterator[bytes]:
+        """Stream TTS audio using piper-tts (local, open-source) and resample to 16kHz."""
+        import subprocess
+        import wave
+        import io
+        import numpy as np
+        from piper import PiperVoice
+        
+        voice_id = voice.get("voice_id", "tr_TR-fahrettin-medium")
+        length_scale = voice.get("length_scale", 1.0)
+        noise_scale = voice.get("noise_scale", 0.667)
+        noise_w = voice.get("noise_w", 0.8)
+        
+        timing.tts_model = f"piper:{voice_id}"
+        timing.voice_id = voice_id
+        timing.tts_request_start_monotonic = timing.tts_request_start_monotonic or time.perf_counter()
+        record_usage(tts_chars=len(text))
+        
+        # Clean text for TTS
+        clean_text = self._clean_for_tts(text)
+        if not clean_text:
+            return
+        
+        # Load Piper voice
+        try:
+            # First try loading from cache
+            model_path = f"/home/tekinaltun/.cache/piper/{voice_id}.onnx"
+            config_path = f"/home/tekinaltun/.cache/piper/{voice_id}.json"
+            
+            if not (os.path.exists(model_path) and os.path.exists(config_path)):
+                raise RuntimeError(f"Piper voice files not found at {model_path} and {config_path}")
+            
+            piper_voice = PiperVoice.load(model_path, config_path=config_path)
+            
+        except Exception as e:
+            raise RuntimeError(f"Failed to load Piper voice: {e}")
+        
+        import piper
+        
+        # Synthesize audio (Piper outputs at its native sample rate, typically 22050 Hz)
+        audio_buffer = io.BytesIO()
+        with wave.open(audio_buffer, 'wb') as wav_file:
+            piper_voice.synthesize_wav(clean_text, wav_file, syn_config=piper.SynthesisConfig(
+                length_scale=length_scale,
+                noise_scale=noise_scale,
+                noise_w_scale=noise_w,
+            ))
+        
+        # Read WAV and resample to 16kHz for the pipeline
+        audio_buffer.seek(0)
+        with wave.open(audio_buffer, 'rb') as wav_file:
+            input_rate = wav_file.getframerate()
+            input_channels = wav_file.getnchannels()
+            input_width = wav_file.getsampwidth()
+            n_frames = wav_file.getnframes()
+            raw_audio = wav_file.readframes(n_frames)
+        
+        # Convert to numpy array (int16)
+        audio_data = np.frombuffer(raw_audio, dtype=np.int16)
+        
+        # Resample from input_rate to 16000 Hz if needed
+        target_rate = 16000
+        if input_rate != target_rate:
+            # Simple linear interpolation resampling
+            duration = len(audio_data) / input_rate
+            target_samples = int(duration * target_rate)
+            # Use scipy-like resampling via numpy
+            if target_samples > 0:
+                old_indices = np.arange(len(audio_data))
+                new_indices = np.linspace(0, len(audio_data) - 1, target_samples)
+                audio_data = np.interp(new_indices, old_indices, audio_data).astype(np.int16)
+        
+        # Stream audio in chunks
+        chunk_size = 4096
+        first_chunk = True
+        for i in range(0, len(audio_data), chunk_size):
+            chunk = audio_data[i:i + chunk_size]
+            if len(chunk) == 0:
+                break
+            if first_chunk:
+                timing.first_tts_audio_byte_monotonic = time.perf_counter()
+                first_chunk = False
+            yield chunk.tobytes()
+
+    def _tts_elevenlabs(self, text: str, timing: TurnTiming, voice: dict) -> Iterator[bytes]:
         key = os.environ.get("ELEVENLABS_API_KEY") or os.environ.get("ELEVEN_API_KEY") or os.environ.get("XI_API_KEY")
         if not key:
             raise RuntimeError("ElevenLabs API key not found")
@@ -1151,7 +1250,12 @@ async def websocket_endpoint(ws: WebSocket) -> None:
     await ws.send_json({"type": "status", "message": "Hermes voice server connected."})
     try:
         while True:
-            message = await ws.receive()
+            try:
+                message = await ws.receive()
+            except Exception as e:
+                # Any error during receive means the connection is likely dead
+                print(f"WebSocket receive error: {e}", flush=True)
+                break
             if "text" in message and message["text"] is not None:
                 event = json.loads(message["text"])
                 etype = event.get("type")
@@ -1195,14 +1299,14 @@ async def websocket_endpoint(ws: WebSocket) -> None:
                 if conn.recording:
                     conn.audio_chunks.append(message["bytes"])
                     _maybe_schedule_partial(ws, pipeline, conn)
-    except WebSocketDisconnect:
+    except Exception as e:
+        # Catch any other exceptions to prevent the server from crashing
+        print(f"Unexpected error in websocket_endpoint: {e}", flush=True)
+    finally:
         if conn.turn_task and not conn.turn_task.done():
             conn.turn_task.cancel()
         print("Client disconnected", flush=True)
-    finally:
         WS_CLIENTS.discard(ws)
-
-
 def main() -> int:
     server = CFG["server"]
     host = server.get("host", "0.0.0.0")
