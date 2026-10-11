@@ -880,17 +880,23 @@ class MainWindow(QMainWindow):
         self.feed_v.setContentsMargins(4, 4, 4, 4); self.feed_v.setSpacing(6)
         self.feed_v.addStretch()
         scroll.setWidget(self.feed_inner)
+        self.feed_scroll = scroll          # keep a handle for auto-scroll
         fv.addWidget(scroll)
         center.addWidget(feed_holder, stretch=2)
 
         chat_row = QHBoxLayout()
         self.chat_input = QLineEdit()
-        self.chat_input.setPlaceholderText("Hermes'e yaz... (/new sıfırlar · ses: Boşluk)")
+        self.chat_input.setPlaceholderText("Hermes'e yaz... (Boşluk = ses)")
         self.chat_input.returnPressed.connect(self.send_chat)
         self.send_btn = QPushButton("GÖNDER"); self.send_btn.setObjectName("btn")
         self.send_btn.clicked.connect(self.send_chat)
+        self.clear_btn = QPushButton("🗑"); self.clear_btn.setObjectName("btnDanger")
+        self.clear_btn.setFixedWidth(34)
+        self.clear_btn.setToolTip("Konuşma geçmişini sil (Hermes oturumunu /new ile sıfırlar)")
+        self.clear_btn.clicked.connect(self.clear_history)
         chat_row.addWidget(self.chat_input, stretch=1)
         chat_row.addWidget(self.send_btn)
+        chat_row.addWidget(self.clear_btn)
         center.addLayout(chat_row)
         cw = QWidget(); cw.setLayout(center); cw.setObjectName("col")
         grid.addWidget(cw, 1, 1)
@@ -1038,20 +1044,32 @@ class MainWindow(QMainWindow):
         lbl.setObjectName("msg" + cls.capitalize())
         lbl.setWordWrap(True)
         lbl.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        self._stick_to_bottom()
         self.feed_v.insertWidget(self.feed_v.count() - 1, lbl)
-        while self.feed_v.count() > 81:
-            item = self.feed_v.takeAt(0)
-            if item.widget():
-                item.widget().deleteLater()
+        # no cap on kept messages — scroll up to see the full history
         if persist and cls in ("you", "jarvis", "sys") and text:
             self._persist_msg(cls, text)
-        QTimer.singleShot(10, self.scroll_feed_bottom)
+        QTimer.singleShot(10, self._maybe_scroll_after_insert)
         return lbl
 
     def scroll_feed_bottom(self):
-        sa = self.feed_inner.parentWidget()
-        if sa and hasattr(sa, "verticalScrollBar"):
-            sa.verticalScrollBar().setValue(sa.verticalScrollBar().maximum())
+        # Follow only when the user is (near) the bottom. If they scrolled up
+        # to read history, keep their position and don't yank the view.
+        sb = self.feed_scroll.verticalScrollBar()
+        at_bottom = sb.maximum() - sb.value() <= 40
+        if at_bottom:
+            sb.setValue(sb.maximum())
+
+    def _stick_to_bottom(self):
+        """Call BEFORE inserting a message: if the view is at the bottom,
+        remember it so the post-insert scroll actually follows the new msg."""
+        sb = self.feed_scroll.verticalScrollBar()
+        self._follow = sb.maximum() - sb.value() <= 40
+
+    def _maybe_scroll_after_insert(self):
+        if getattr(self, "_follow", True):
+            sb = self.feed_scroll.verticalScrollBar()
+            sb.setValue(sb.maximum())
 
     def add_activity(self, text: str):
         # activity list removed in the compact redesign — mirror into feed as sys
@@ -1090,7 +1108,8 @@ class MainWindow(QMainWindow):
         if not self.live_msg:
             self.live_msg = self.add_msg("you", "", persist=False)
         self.live_msg.setText(text)
-        QTimer.singleShot(10, self.scroll_feed_bottom)
+        self._stick_to_bottom()
+        QTimer.singleShot(10, self._maybe_scroll_after_insert)
 
     def clear_live(self):
         if self.live_msg is not None:
@@ -1348,6 +1367,46 @@ class MainWindow(QMainWindow):
             if item.widget():
                 item.widget().deleteLater()
         self.add_msg("sys", "sohbet temizlendi (geçmiş Hermes'te kalır — /new ile sıfırla)")
+
+    def clear_history(self):
+        """Clear the on-screen feed AND the persisted chat file + Hermes session."""
+        from PySide6.QtWidgets import QMessageBox
+        btns = QMessageBox.StandardButton
+        ret = QMessageBox.question(
+            self, "Geçmişi Sil",
+            "Konuşma geçmişi ekrandan ve kayıt dosyasından silinecek.\n"
+            "Hermes oturumu da /new ile sıfırlanacak.\n\nEmin misiniz?",
+            btns.Yes | btns.No, btns.No)
+        if ret != btns.Yes:
+            return
+        # 1) wipe the persisted jsonl
+        try:
+            if os.path.exists(self.CHAT_PATH):
+                os.remove(self.CHAT_PATH)
+        except Exception as exc:
+            self.add_msg("sys", f"geçmiş dosyası silinemedi: {exc}")
+        # 2) wipe the on-screen feed
+        while self.feed_v.count() > 1:
+            item = self.feed_v.takeAt(0)
+            w = item.widget() if item else None
+            if w is not None:
+                w.deleteLater()
+        # 3) reset the Hermes session in a worker thread (non-blocking)
+        import threading
+        def work():
+            try:
+                import requests
+                base = SERVER_WS.replace("ws://", "http://").replace("/ws", "")
+                r = requests.post(f"{base}/api/chat",
+                                  json={"input": "/new", "conversation": CONV},
+                                  timeout=30)
+                ok = r.ok
+            except Exception:
+                ok = False
+            QTimer.singleShot(0, lambda: self.add_msg(
+                "sys", "oturum sıfırlandı — geçmiş tamamen silindi" if ok
+                else "oturum sıfırlanamadı (sunucuya ulaşılıyor mu?)"))
+        threading.Thread(target=work, daemon=True).start()
 
     def refresh_api(self):
         import threading
